@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php
         yii\bootstrap\Modal::begin([
             'id' => "modal-create",
-            'header' => '<h2>Hello world</h2>',
+            'header' => '<h2>Create User</h2>',
             'toggleButton' => [
                 'label' => 'Create User',
                 'class' => 'btn btn-success'
@@ -28,13 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
         echo $this->render('create', ['model' => $newUser]);
         yii\bootstrap\Modal::end();
         ?>
-
     </p>
     <?php
     foreach ($dataProvider->getModels() as $model) {
         yii\bootstrap\Modal::begin([
             'id' => "modal-{$model->id}",
-            'header' => '<h2>Hello world</h2>',
+            'header' => '<h2>Update User</h2>',
         ]);
         echo $this->render('update', ['model' => $model]);
         yii\bootstrap\Modal::end();

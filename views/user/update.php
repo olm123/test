@@ -9,8 +9,6 @@ use yii\helpers\Html;
 ?>
 <div class="user-update">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
     <div class="user-form">
 
         <?php $form = ActiveForm::begin(['action' => \yii\helpers\Url::to(['update', 'id' => $model->id])]); ?>

@@ -23,7 +23,7 @@ class m170828_170637_create_news_table extends Migration
             'image' => $this->string(),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
-            'status' => $this->boolean(),
+            'status' => $this->smallInteger()->notNull()->defaultValue(0),
             'author' => $this->integer()->notNull(),
         ]);
 
