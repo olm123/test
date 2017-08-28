@@ -11,6 +11,7 @@ class m000000_000001_create_user_table extends Migration
             [
                 'id' => $this->primaryKey(),
                 'email' => $this->string(255)->notNull(),
+                'username' => $this->string(255)->notNull(),
                 'password_hash' => $this->string(60)->notNull(),
                 'auth_key' => $this->string(32)->notNull(),
                 'confirmed_at' => $this->integer(),
@@ -21,6 +22,7 @@ class m000000_000001_create_user_table extends Migration
         );
 
         $this->createIndex('idx_user_email', '{{%user}}', 'email', true);
+        $this->createIndex('idx_user_username', '{{%user}}', 'username', true);
     }
 
     public function down()

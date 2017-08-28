@@ -46,15 +46,37 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'id',
-            'email:email',
-            'password_hash',
-            'auth_key',
-            'confirmed_at',
-            // 'last_login_at',
-            // 'updated_at',
-            // 'created_at',
-
+            [
+                'attribute' => 'id',
+                'filter' => true,
+            ],
+            [
+                'attribute' => 'username',
+                'filter' => true,
+            ],
+            [
+                'attribute' => 'email',
+                'format' => 'email',
+                'filter' => true,
+            ],
+            [
+                'attribute' => 'last_login_at',
+                'label' => 'Registration date',
+                'format' => 'html',
+                'value' => function ($model) {
+                    return \Yii::$app->formatter->asDate($model->created_at, 'full');
+                },
+                'filter' => false,
+            ],
+            [
+                'attribute' => 'created_at',
+                'label' => 'Last login date',
+                'format' => 'html',
+                'value' => function ($model) {
+                    return \Yii::$app->formatter->asDate($model->last_login_at, 'full');
+                },
+                'filter' => false,
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'buttons' => [

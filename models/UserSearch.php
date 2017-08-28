@@ -18,8 +18,8 @@ class UserSearch extends User
     public function rules()
     {
         return [
-            [['id', 'confirmed_at', 'last_login_at', 'updated_at', 'created_at'], 'integer'],
-            [['email', 'password_hash', 'auth_key'], 'safe'],
+            [['id', 'last_login_at', 'created_at'], 'integer'],
+            [['email', 'username',], 'string'],
         ];
     }
 
@@ -47,6 +47,15 @@ class UserSearch extends User
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'username',
+                    'email',
+                    'created_at',
+                    'last_login_at',
+                ]
+            ]
         ]);
 
         $this->load($params);
@@ -60,9 +69,7 @@ class UserSearch extends User
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'confirmed_at' => $this->confirmed_at,
             'last_login_at' => $this->last_login_at,
-            'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
         ]);
 

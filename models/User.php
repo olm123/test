@@ -6,6 +6,7 @@ use app\components\Mailer;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\IdentityInterface;
 
@@ -15,6 +16,7 @@ use yii\web\IdentityInterface;
  * @property integer $id
  * @property string $email
  * @property string $password_hash
+ * @property string $username
  * @property string $auth_key
  * @property integer $confirmed_at
  * @property integer $last_login_at
@@ -26,6 +28,10 @@ use yii\web\IdentityInterface;
 class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
     const REMEMBER_FOR = 86400;
+    /**
+     * @var string Plain password
+     */
+    public $password;
 
     public function behaviors()
     {
@@ -33,6 +39,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             TimestampBehavior::class,
         ];
     }
+
     /**
      * @inheritdoc
      */
@@ -42,17 +49,31 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function scenarios()
+    {
+        return ArrayHelper::merge(
+            parent::scenarios(),
+            [
+                'register' => ['username', 'email', 'password'],
+            ]
+        );
+    }
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['email', 'password_hash', 'auth_key'], 'required'],
-            [['confirmed_at', 'last_login_at', 'updated_at', 'created_at'], 'integer'],
-            [['email'], 'string', 'max' => 255],
-            [['password_hash'], 'string', 'max' => 60],
-            [['auth_key'], 'string', 'max' => 32],
+            [['email', 'username'], 'required'],
+            [['email', 'username'], 'string', 'max' => 255],
             [['email'], 'unique'],
+            [['email'], 'email'],
+            [['username'], 'unique'],
+            ['password', 'string', 'min' => 6, 'max' => 72],
+            ['password', 'required', 'on' => ['register']],
         ];
     }
 
@@ -64,6 +85,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             'id' => 'ID',
             'email' => 'Email',
+            'username' => 'Username',
             'password_hash' => 'Password Hash',
             'auth_key' => 'Auth Key',
             'confirmed_at' => 'Confirmed At',
@@ -160,12 +182,12 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * Generates password hash from password and sets it to the model
-     *
-     * @param string $password
      */
-    public function setPassword($password)
+    public function generatePasswordHash()
     {
-        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+        if ($this->password !== null) {
+            $this->password_hash = Yii::$app->security->generatePasswordHash($this->password);
+        }
     }
 
     /**
@@ -198,20 +220,14 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         ]);
         if ($token instanceof Token && !$token->isExpired) {
             $token->delete();
-            if (($success = $this->confirm())) {
+            if ($this->confirm()) {
                 \Yii::$app->user->login($this, self::REMEMBER_FOR);
-                $message = \Yii::t('user', 'Thank you, registration is now complete.') . ' ' . Html::a(\Yii::t('user', 'Sign in'), \Yii::$app->user->loginUrl);
+                return true;
             } else {
-                $message = \Yii::t('user', 'Something went wrong and your account has not been confirmed.');
+                throw new \RuntimeException();
             }
-        } else {
-            $success = false;
-            $message = \Yii::t('user', 'The confirmation link is invalid or expired. Please try requesting a new one.');
         }
-
-        \Yii::$app->session->setFlash($success ? 'success' : 'danger', $message);
-
-        return $success;
+        return false;
     }
 
     /**
@@ -223,7 +239,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return $result;
     }
 
-    public function register()
+    public function create()
     {
         if ($this->getIsNewRecord() == false) {
             throw new \RuntimeException('Calling "' . __CLASS__ . '::' . __METHOD__ . '" on existing user');
@@ -257,5 +273,19 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     private function getMailer()
     {
         return \Yii::$container->get(Mailer::className());
+    }
+
+    public function beforeSave($insert)
+    {
+        if ($insert) {
+            $this->generateAuthKey();
+        }
+        if (!empty($this->password)) {
+            $this->setAttribute(
+                'password_hash',
+                Yii::$app->security->generatePasswordHash($this->password)
+            );
+        }
+        return parent::beforeSave($insert);
     }
 }

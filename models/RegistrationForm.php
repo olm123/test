@@ -27,6 +27,7 @@ class RegistrationForm extends Model
      * @var string User email address
      */
     public $email;
+    public $username;
 
     /**
      * @var string Password
@@ -39,15 +40,15 @@ class RegistrationForm extends Model
     public function rules()
     {
         return [
-            'emailTrim' => ['email', 'filter', 'filter' => 'trim'],
-            'emailRequired' => ['email', 'required'],
+            'trimFields' => [['email', 'username'], 'filter', 'filter' => 'trim'],
+            'requiredFields' => [['email', 'username', 'password'], 'required'],
             'emailPattern' => ['email', 'email'],
+            'usernamePattern' => ['username', 'match', 'pattern' => '/^[a-zA-Z0-9]\w*$/i'],
             'emailUnique' => [
                 'email',
                 'unique',
                 'targetClass' => User::class,
             ],
-            'passwordRequired' => ['password', 'required'],
             'passwordLength' => ['password', 'string', 'min' => 6, 'max' => 72],
         ];
     }
@@ -86,7 +87,7 @@ class RegistrationForm extends Model
         $user = Yii::createObject(User::className());
         $this->loadAttributes($user);
 
-        return $user->register();
+        return $user->create();
     }
 
     /**
@@ -101,7 +102,7 @@ class RegistrationForm extends Model
     protected function loadAttributes(User $user)
     {
         $user->email = $this->email;
-        $user->setPassword($this->password);
-        $user->generateAuthKey();
+        $user->username = $this->username;
+        $user->password = $this->password;
     }
 }

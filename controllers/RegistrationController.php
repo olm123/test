@@ -65,9 +65,6 @@ class RegistrationController extends Controller
             throw new NotFoundHttpException();
         }
 
-
-        $user->attemptConfirmation($code);
-
-        return $this->render('/confirmed');
+        return $this->render('confirm', ['success' => $user->attemptConfirmation($code)]);
     }
 }

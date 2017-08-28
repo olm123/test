@@ -32,8 +32,12 @@ class UserQuery extends \yii\db\ActiveQuery
         return parent::one($db);
     }
 
-    public function byEmail($email)
+    /**
+     * @param $login
+     * @return $this
+     */
+    public function byLogin($login)
     {
-        return $this->andWhere(['email' => $email]);
+        return $this->andWhere(['or', ['email' => $login], ['username' => $login]]);
     }
 }

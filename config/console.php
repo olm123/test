@@ -9,6 +9,9 @@ $config = [
     'bootstrap' => ['log'],
     'controllerNamespace' => 'app\commands',
     'components' => [
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -21,6 +24,12 @@ $config = [
             ],
         ],
         'db' => $db,
+    ],
+    'controllerMap' => [
+        'migrate' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'migrationPath' => ['@app/migrations', '@yii/rbac/migrations/'],
+        ],
     ],
     'params' => $params,
     /*

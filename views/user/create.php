@@ -5,11 +5,8 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\models\UserCreateForm */
+/* @var $model app\models\UserForm */
 
-$this->title = 'Create User';
-$this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-create">
 
@@ -20,8 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $form = ActiveForm::begin(['action' => \yii\helpers\Url::to(['create'])]); ?>
 
         <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
-
-        <?= $form->field($model, 'password_hash')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'password')->textInput(['maxlength' => true]) ?>
 
         <div class="form-group">
             <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

@@ -11,7 +11,7 @@ use yii\base\Model;
  */
 class LoginForm extends Model
 {
-    public $email;
+    public $login;
     public $password;
     public $rememberMe = true;
 
@@ -24,11 +24,11 @@ class LoginForm extends Model
     public function rules()
     {
         return [
-            // email and password are both required
-            [['email', 'password'], 'required'],
-            ['email',
+            // login and password are both required
+            [['login', 'password'], 'required'],
+            ['login',
                 function ($attribute) {
-                    if (!$this->getUser()->getIsConfirmed()) {
+                    if ($this->getUser() && !$this->getUser()->getIsConfirmed()) {
                         $this->addError($attribute, 'You need to confirm your email address');
                     }
                 }
@@ -53,33 +53,32 @@ class LoginForm extends Model
             $user = $this->getUser();
 
             if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect email or password.');
+                $this->addError($attribute, 'Incorrect login or password.');
             }
         }
     }
 
     /**
-     * Logs in a user using the provided email and password.
+     * Logs in a user using the provided login and password.
      * @return bool whether the user is logged in successfully
      */
     public function login()
     {
         if ($this->validate()) {
-            $this->getUser()->updateAttributes(['last_login_at' => time()]);
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
         }
         return false;
     }
 
     /**
-     * Finds user by [[email]]
+     * Finds user by [[login]]
      *
      * @return User|null
      */
     public function getUser()
     {
         if ($this->_user === false) {
-            $this->_user = User::find()->byEmail($this->email)->one();
+            $this->_user = User::find()->byLogin($this->login)->one();
         }
 
         return $this->_user;

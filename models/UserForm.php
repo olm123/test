@@ -11,11 +11,21 @@ namespace app\models;
 
 use yii\base\Model;
 
-class UserCreateForm extends Model
+class UserForm extends Model
 {
     public $email;
+    public $username;
     public $password;
-    public $is_confirmed;
+    /**
+     * @var User
+     */
+    private $user;
+
+    public function __construct(User $user, array $config = [])
+    {
+        $this->user = $user;
+        parent::__construct($config);
+    }
 
     public function rules()
     {
@@ -23,26 +33,32 @@ class UserCreateForm extends Model
             'emailTrim' => ['email', 'filter', 'filter' => 'trim'],
             'emailRequired' => ['email', 'required'],
             'emailPattern' => ['email', 'email'],
-            'emailUnique' => [
-                'email',
+            'uniqueFields' => [
+                ['email', 'username'],
                 'unique',
                 'targetClass' => User::class,
+                'when' => function($attribute) {
+                    return $this->{$attribute} !== $this->getUser()->{$attribute};
+                }
             ],
             'passwordRequired' => ['password', 'required'],
             'passwordLength' => ['password', 'string', 'min' => 6, 'max' => 72],
-            'isConfirmed' => ['is_confirmed', 'boolean']
         ];
     }
 
-    public function create()
+    public function save()
     {
         if (!$this->validate()) {
             return false;
         }
-        $user = new User();
+        $user = $this->getUser();
         $user->email = $this->email;
-        $user->setPassword($this->password);
-        $user->confirmed_at = $this->is_confirmed ? time() : null;
+        $user->password = $this->password;
         return $user->save();
+    }
+
+    private function getUser()
+    {
+        return $this->user;
     }
 }

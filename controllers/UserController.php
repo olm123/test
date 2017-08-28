@@ -2,10 +2,11 @@
 
 namespace app\controllers;
 
-use app\models\UserCreateForm;
+use app\models\UserForm;
 use Yii;
 use app\models\User;
 use app\models\UserSearch;
+use yii\filters\AccessControl;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -23,11 +24,20 @@ class UserController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+                ],
+            ]
         ];
     }
 
@@ -39,7 +49,6 @@ class UserController extends Controller
     {
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
         Url::remember();
 
         $newUser = new User();
@@ -70,11 +79,12 @@ class UserController extends Controller
      */
     public function actionCreate()
     {
-        $model = new UserCreateForm();
-
+        $model = new User();
+        $model->setScenario('register');
         if ($model->load(Yii::$app->request->post()) && $model->create()) {
             return $this->goBack();
         } else {
+            var_dump($model->errors);
             return $this->render('create', [
                 'model' => $model,
             ]);
